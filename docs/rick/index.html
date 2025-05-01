@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Click to continue &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; - rick roll online website - never gonna give you up</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            font-family: Arial, sans-serif;
+        }
+
+        #overlay {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        #clickPrompt {
+            color: #fff;
+            font-size: 2em;
+            text-align: center;
+            animation: pulse 1.5s infinite;
+        }
+
+        #videoContainer {
+            display: none;
+            max-width: 800px;
+            margin: 20px auto;
+        }
+
+        video {
+            width: 100%;
+            height: auto;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 0.8;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+
+            100% {
+                opacity: 0.8;
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 点击覆盖层 -->
+    <div id="overlay">
+        <div id="clickPrompt" data-translate="click_continue"></div>
+    </div>
+
+    <!-- 视频容器 -->
+    <div id="videoContainer">
+        <video loop id="myVideo">
+            <source src="video.mp4" type="video/mp4">
+            您的浏览器不支持视频播放
+            Your browser does not support video playback.
+        </video>
+    </div>
+
+    <script>
+        // 获取页面元素
+        const overlay = document.getElementById('overlay');
+        const videoContainer = document.getElementById('videoContainer');
+        const video = document.getElementById('myVideo');
+
+        // 点击覆盖层时的处理
+        overlay.addEventListener('click', () => {
+            // 隐藏覆盖层
+            overlay.style.display = 'none';
+
+            // 显示视频容器
+            videoContainer.style.display = 'block';
+
+            // 开始播放视频
+            video.play().catch(error => {
+                console.log('Failed playing video:', error);
+            });
+        });
+
+        // 可选：视频结束后的处理
+        video.addEventListener('ended', () => {
+            // 可以在这里添加视频播放结束后的操作
+            // 例如：重新显示覆盖层
+            // overlay.style.display = 'flex';
+        });
+
+        const translations = {
+            'en': {
+                'click_continue': 'Click to continue'
+            },
+            'zh-CN': {
+                'click_continue': '点击继续'
+            }
+        };
+
+        // 获取首选语言
+        function getPreferredLanguage() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const langParam = urlParams.get('lang');
+            const supportedLangs = Object.keys(translations);
+
+            // 精确匹配URL参数
+            if (langParam && supportedLangs.includes(langParam)) {
+                return langParam;
+            }
+            for (const userLang of navigator.languages) {
+                // 精确匹配支持的语言
+                if (supportedLangs.includes(userLang)) return userLang;
+                // 匹配主语言代码（如zh-CN中的zh）
+                const mainLang = userLang.split('-')[0];
+                const matchedLang = supportedLangs.find(lang => lang.startsWith(mainLang));
+                if (matchedLang) return matchedLang;
+            }
+            return 'en'; // 默认语言
+        }
+
+        // 应用翻译到页面
+        function applyTranslations(lang) {
+            if (!translations[lang]) lang = 'en'; // 回退到英语
+            document.querySelectorAll('[data-translate]').forEach(element => {
+                const key = element.getAttribute('data-translate');
+                const text = translations[lang][key];
+                if (text !== undefined) element.textContent = text;
+            });
+        }
+
+        // 页面加载后执行翻译
+        document.addEventListener('DOMContentLoaded', () => {
+            applyTranslations(getPreferredLanguage());
+        });
+    </script>
+</body>
+
+</html>
