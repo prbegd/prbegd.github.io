@@ -99,7 +99,7 @@
 
     <!-- 视频容器  -->
     <div id="videoContainer">
-        <video loop id="myVideo" preload="none">
+        <video loop id="myVideo" preload="auto">
             <source src="video.mp4" type="video/mp4">
             您的浏览器不支持视频播放
             Your browser does not support video playback.
@@ -140,12 +140,6 @@
             loading.style.display = 'none';
         });
 
-        // 可选：视频结束后的处理
-        video.addEventListener('ended', () => {
-            // 可以在这里添加视频播放结束后的操作
-            // 例如：重新显示覆盖层
-            // overlay.style.display = 'flex';
-        });
 
         const translations = {
             'en': {
