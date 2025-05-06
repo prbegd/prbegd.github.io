@@ -36,11 +36,27 @@
             display: none;
             max-width: 800px;
             margin: 20px auto;
+            position: relative;
         }
 
         video {
             width: 100%;
             height: auto;
+        }
+
+        .loading-spinner {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            z-index: 1001;
         }
 
         @keyframes pulse {
@@ -59,18 +75,31 @@
                 transform: scale(1);
             }
         }
+
+        @keyframes spin {
+            0% {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
     </style>
 </head>
 
 <body>
+    <!-- 加载动画 -->
+    <div class="loading-spinner" id="loading"></div>
+
     <!-- 点击覆盖层 -->
     <div id="overlay">
         <div id="clickPrompt" data-translate="click_continue"></div>
     </div>
 
-    <!-- 视频容器 -->
+    <!-- 视频容器  -->
     <div id="videoContainer">
-        <video loop id="myVideo">
+        <video loop id="myVideo" preload="none">
             <source src="video.mp4" type="video/mp4">
             您的浏览器不支持视频播放
             Your browser does not support video playback.
@@ -82,11 +111,15 @@
         const overlay = document.getElementById('overlay');
         const videoContainer = document.getElementById('videoContainer');
         const video = document.getElementById('myVideo');
+        const loading = document.getElementById('loading');
 
         // 点击覆盖层时的处理
         overlay.addEventListener('click', () => {
             // 隐藏覆盖层
             overlay.style.display = 'none';
+
+            // 显示加载动画
+            loading.style.display = 'block';
 
             // 显示视频容器
             videoContainer.style.display = 'block';
@@ -94,7 +127,17 @@
             // 开始播放视频
             video.play().catch(error => {
                 console.log('Failed playing video:', error);
+                loading.style.display = 'none';
             });
+        });
+
+        // 视频事件监听
+        video.addEventListener('waiting', () => {
+            loading.style.display = 'block';
+        });
+
+        video.addEventListener('playing', () => {
+            loading.style.display = 'none';
         });
 
         // 可选：视频结束后的处理
