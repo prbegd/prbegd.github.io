@@ -133,6 +133,9 @@ struct to_string_using_backtrace {
                 boost::stacktrace::detail::libbacktrace_error_callback,
                 &data
             ) 
+#if defined(__GNUC__) && defined(WIN32)
+            ;
+#else
             ||
             ::backtrace_syminfo(
                 state,
@@ -141,6 +144,7 @@ struct to_string_using_backtrace {
                 boost::stacktrace::detail::libbacktrace_error_callback,
                 &data
             );
+#endif
         }
         line = data.line;
     }
@@ -191,15 +195,18 @@ inline std::string name_impl(const void* addr) {
             boost::stacktrace::detail::libbacktrace_error_callback,
             &data
         )
+#if defined(__GNUC__) && defined(WIN32)
         ;
-        // ||
-        // ::backtrace_syminfo(
-        //     state,
-        //     reinterpret_cast<uintptr_t>(addr),
-        //     boost::stacktrace::detail::libbacktrace_syminfo_callback,
-        //     boost::stacktrace::detail::libbacktrace_error_callback,
-        //     &data
-        // );
+#else
+        ||
+        ::backtrace_syminfo(
+            state,
+            reinterpret_cast<uintptr_t>(addr),
+            boost::stacktrace::detail::libbacktrace_syminfo_callback,
+            boost::stacktrace::detail::libbacktrace_error_callback,
+            &data
+        );
+#endif
     }
     if (!res.empty()) {
         res = boost::core::demangle(res.c_str());
