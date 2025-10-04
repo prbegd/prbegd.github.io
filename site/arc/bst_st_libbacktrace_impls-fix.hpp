@@ -133,7 +133,7 @@ struct to_string_using_backtrace {
                 boost::stacktrace::detail::libbacktrace_error_callback,
                 &data
             ) 
-#if defined(__GNUC__) && defined(WIN32)
+#ifndef __ELF__
             ;
 #else
             ||
@@ -177,17 +177,8 @@ inline std::string name_impl(const void* addr) {
 
     boost::stacktrace::detail::pc_data data = {&res, 0, 0};
     if (state) {
-        // ! driesdeschout 就你写的这个fallback是吧？
-        // ! 没考虑过Windows上的pe格式没有dynsym没法用backtrace_syminfo吗？
-        // ! 你不会是以为backtrace_pcinfo返回的值代表是否成功吧？
-        // ! 怎么没有一个人发现过这个问题？一个这样的issue都没有？
-        // ! 真没有一个人在这个海滩push之后用mingw+libbacktrace啊？
-        // ! apolukhin 你也是神人，在自己的ubuntu上测试没问题就批这个pr是吧？
-        // ! 最主要的是这个pr是2018年合并的？到现在过了7年！7年啊！
-        // ! 你知道我为了找这个bug花了多久吗？你知道吗？？
-
-        // 问：此内容表达了作者怎样的情感？（3分）
-        // "Many thanks! Great patch!" --apolukhin
+        // ! Thank you driesdeschout
+        // ! Thank you apolukhin
         ::backtrace_pcinfo(
             state,
             reinterpret_cast<uintptr_t>(addr),
@@ -195,7 +186,7 @@ inline std::string name_impl(const void* addr) {
             boost::stacktrace::detail::libbacktrace_error_callback,
             &data
         )
-#if defined(__GNUC__) && defined(WIN32)
+#ifndef __ELF__
         ;
 #else
         ||
