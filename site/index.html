@@ -7,6 +7,17 @@
 </head>
 
 <body>
+    <div id="navbar">
+        <script>
+            window.navbarLinkIndex = 0;
+            fetch("https://raw.githubusercontent.com/prbegd/prbegd.github.io/main/shared/navbar.html")
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById("navbar").innerHTML = data;
+                });
+        </script>
+    </div>
+
     <h1>Welcome to my website</h1>
     <h2>中文</h2>
 </body>

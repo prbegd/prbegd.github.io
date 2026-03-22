@@ -1,0 +1,139 @@
+<header class="navbar">
+    <style>
+        .navbar {
+            background: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), 0 4px 8px rgba(0, 0, 0, 0.02);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            width: 100%;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 30px;
+        }
+
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            flex-wrap: nowrap;
+        }
+
+
+        .nav-site-title {
+            font-size: 1.6rem;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            background: linear-gradient(135deg, #1f2b3c, #2c3e4e);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            transition: transform 0.2s ease, opacity 0.2s;
+            white-space: nowrap;
+            cursor: default;
+        }
+
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1.8rem;
+            list-style: none;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #4a5b6e;
+            padding: 0.5rem 0;
+            position: relative;
+            transition: color 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            white-space: nowrap;
+        }
+
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #3b82f6;
+            border-radius: 2px;
+            transition: width 0.3s ease-out;
+        }
+
+
+        .nav-link:hover {
+            color: #1e2f3e;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+
+        .nav-link.active {
+            color: #2563eb;
+            font-weight: 600;
+        }
+
+        .nav-link.active::after {
+            width: 100%;
+            background: #2563eb;
+            height: 2.2px;
+            box-shadow: 0 1px 2px rgba(37, 99, 235, 0.2);
+        }
+
+
+        .nav-link {
+            transition: color 0.2s, font-weight 0.05s;
+        }
+
+
+        .nav-link {
+            font-weight: 500;
+        }
+
+
+        .nav-link:focus-visible {
+            outline: 2px solid #3b82f6;
+            outline-offset: 4px;
+            border-radius: 4px;
+        }
+    </style>
+    <div class="nav-container">
+        <div class="nav-left">
+            <div class="nav-site-title">prbegd's website</div>
+
+            <ul class="nav-links">
+                <li><a href="https://www.prbegd.dev" class="nav-link">Home</a></li>
+                <li><a href="https://blog.prbegd.dev" class="nav-link">Blog</a></li>
+                <li><a href="https://www.prbegd.dev/about" class="nav-link">About</a></li>
+            </ul>
+        </div>
+    </div>
+    <script>
+        (function () {
+            if (window.navbarLinkIndex === undefined) {
+                console.warn("Seems like you haven't set global variable `window.navbarLinkIndex`. The navigate bar won't highlight any links.");
+                return;
+            }
+            if (typeof window.navbarLinkIndex !== "number") {
+                console.warn("Seems like you haven't set global variable `window.navbarLinkIndex` is not number. The navigate bar won't highlight any links.");
+                return;
+            }
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks[window.navbarLinkIndex].classList.add("active");
+        })();
+    </script>
+</header>
