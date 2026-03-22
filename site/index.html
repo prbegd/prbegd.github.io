@@ -7,10 +7,10 @@
 </head>
 
 <body>
+    <script>window.navbarLinkIndex = 0;</script>
     <div id="navbar">
         <script>
-            window.navbarLinkIndex = 0;
-            fetch("https://raw.githubusercontent.com/prbegd/prbegd.github.io/main/shared/navbar.html")
+            fetch("https://www.prbegd.dev/_shared/navbar.html")
                 .then(response => response.text())
                 .then(data => {
                     document.getElementById("navbar").innerHTML = data;
