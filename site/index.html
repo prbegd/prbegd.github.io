@@ -7,9 +7,9 @@
 </head>
 
 <body>
-    <script>window.navbarLinkIndex = 0;</script>
     <div id="navbar">
         <script>
+            window.navbarLinkIndex = 0;
             fetch("https://www.prbegd.dev/_shared/navbar.html")
                 .then(response => response.text())
                 .then(data => {
