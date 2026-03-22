@@ -1,34 +1,35 @@
-<style>
-    main {
-        padding: 8px;
-    }
-</style>
 <header class="navbar">
     <style>
-        html,
         body {
-            margin: 0;
-            padding: 0;
+            overflow: hidden;
+        }
+
+        main {
+            top: 0;
+            position: absolute;
+            overflow: auto;
+            height: 0;
+            width: 100%;
         }
 
         .navbar {
             background: rgba(255, 255, 255, 0.96);
             box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03), 0 4px 0 rgba(0, 0, 0, 0.02);
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            width: 100%;
-            padding: 0 2rem;
-            position: relative;
+            position: absolute;
             top: 0;
             left: 0;
             z-index: 10;
+            width: 100%;
         }
 
         .nav-container {
-            max-width: 1400px;
+            /* max-width: 1400px; */
             display: flex;
             align-items: center;
             justify-content: flex-start;
             min-height: 30px;
+            margin: 0 2rem;
         }
 
 
@@ -147,6 +148,16 @@
             }
             const navLinks = document.querySelectorAll('.nav-link');
             navLinks[window.navbarLinkIndex].classList.add("active");
+        })();
+        (function () {
+            const navbar = document.querySelector('.navbar');
+            const main = document.querySelector('main');
+
+            if (navbar && main) {
+                const refBottom = navbar.getBoundingClientRect().bottom;
+                main.style.top = `${refBottom}px`;
+                main.style.height = `calc(100vh - ${refBottom}px)`;
+            }
         })();
     </script>
 </header>
