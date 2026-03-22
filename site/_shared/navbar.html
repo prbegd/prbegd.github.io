@@ -132,6 +132,7 @@
                 console.warn("Seems like you haven't set global variable `window.navbarLinkIndex` is not number. The navigate bar won't highlight any links.");
                 return;
             }
+            console.debug("window.navbarLinkIndex",window.navbarLinkIndex);
             const navLinks = document.querySelectorAll('.nav-link');
             navLinks[window.navbarLinkIndex].classList.add("active");
         })();
