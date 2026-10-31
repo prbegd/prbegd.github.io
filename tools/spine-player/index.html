@@ -1,0 +1,2807 @@
+<!-- Danger! AI Slop code ahead. Do not proceed unless the grace of the tokens are given. -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Spine 动画播放器</title>
+  <style id="uikits-css">
+    /* ===== ui-kits.css 全量内联（淡橙红组件规范，来源 ui-kits.css） ===== */
+    /* ============================================================
+   淡橙红 UI Kit — 现代简约组件库
+   主题色: #FFAB91
+   ============================================================ */
+
+    /* ---------- 1. 设计 Token ---------- */
+    :root {
+      /* 品牌色阶（淡橙红） */
+      --primary-50: #FFF3EE;
+      --primary-100: #FFE0D3;
+      --primary-200: #FFCCBC;
+      --primary-300: #FFAB91;
+      /* 主题色 */
+      --primary-400: #FF8A65;
+      --primary-500: #F4511E;
+      --primary-600: #D84315;
+      --primary-700: #BF360C;
+
+      /* 中性色 */
+      --gray-50: #FAF8F6;
+      --gray-100: #F3EFEB;
+      --gray-200: #E8E2DD;
+      --gray-300: #D4CCC5;
+      --gray-400: #A89F97;
+      --gray-500: #7A726B;
+      --gray-600: #554F49;
+      --gray-700: #3A3531;
+      --gray-800: #26221F;
+      --gray-900: #171412;
+
+      /* 语义色 */
+      --success: #4CAF7D;
+      --success-bg: #E6F5EC;
+      --warning: #F0A840;
+      --warning-bg: #FDF3E0;
+      --danger: #E5615C;
+      --danger-bg: #FCEBEA;
+      --info: #4A9FD8;
+      --info-bg: #E7F2FA;
+
+      /* 文本 */
+      --text-1: var(--gray-800);
+      --text-2: var(--gray-600);
+      --text-3: var(--gray-400);
+      --text-inverse: #FFFFFF;
+
+      /* 背景 */
+      --bg-page: var(--gray-50);
+      --bg-card: #FFFFFF;
+      --bg-subtle: var(--gray-100);
+
+      /* 边框 */
+      --border: var(--gray-200);
+      --border-strong: var(--gray-300);
+
+      /* 圆角 */
+      --radius-xs: 4px;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --radius-xl: 20px;
+      --radius-full: 999px;
+
+      /* 阴影（柔和、克制） */
+      --shadow-xs: 0 1px 2px rgba(38, 34, 31, .04);
+      --shadow-sm: 0 1px 3px rgba(38, 34, 31, .06), 0 1px 2px rgba(38, 34, 31, .04);
+      --shadow-md: 0 4px 12px rgba(38, 34, 31, .07), 0 2px 4px rgba(38, 34, 31, .04);
+      --shadow-lg: 0 12px 32px rgba(38, 34, 31, .10), 0 4px 8px rgba(38, 34, 31, .04);
+
+      /* 动效：轻量、统一 */
+      --ease: cubic-bezier(.4, 0, .2, 1);
+      --t-fast: 120ms;
+      --t-base: 180ms;
+      --t-slow: 260ms;
+
+      /* 布局 */
+      --sidebar-w: 248px;
+      --topbar-h: 60px;
+      --content-max: 1180px;
+    }
+
+    /* ---------- 2. Reset & Base ---------- */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-1);
+      background: var(--bg-page);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      margin: 0;
+      font-weight: 600;
+      line-height: 1.3;
+      color: var(--text-1);
+    }
+
+    p {
+      margin: 0 0 8px;
+    }
+
+    a {
+      color: var(--primary-500);
+      text-decoration: none;
+      transition: color var(--t-fast) var(--ease);
+    }
+
+    a:hover {
+      color: var(--primary-600);
+    }
+
+    button {
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    input,
+    textarea,
+    select {
+      font-family: inherit;
+      font-size: inherit;
+    }
+
+    img,
+    svg {
+      display: block;
+      max-width: 100%;
+    }
+
+    hr {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin: 24px 0;
+    }
+
+    /* 尊重 reduced-motion */
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important;
+      }
+    }
+
+    /* ---------- 3. 布局 ---------- */
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* 侧边栏 */
+    .sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 20px 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 4px 12px 20px;
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--text-1);
+    }
+
+    .brand-mark {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--primary-300), var(--primary-500));
+      display: grid;
+      place-items: center;
+      color: #fff;
+    }
+
+    .nav-group {
+      margin-bottom: 16px;
+    }
+
+    .nav-group-title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      padding: 8px 12px 6px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      color: var(--text-2);
+      font-size: 13.5px;
+      cursor: pointer;
+      transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+    }
+
+    .nav-item:hover {
+      background: var(--gray-100);
+      color: var(--text-1);
+    }
+
+    .nav-item.active {
+      background: var(--primary-50);
+      color: var(--primary-600);
+      font-weight: 500;
+    }
+
+    .nav-item svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    /* 主区 */
+    .main {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 顶栏 */
+    .topbar {
+      height: var(--topbar-h);
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 28px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .topbar .crumb {
+      color: var(--text-3);
+      font-size: 13px;
+    }
+
+    .topbar .crumb strong {
+      color: var(--text-1);
+      font-weight: 500;
+    }
+
+    .topbar-spacer {
+      flex: 1;
+    }
+
+    /* 内容 */
+    .content {
+      max-width: var(--content-max);
+      width: 100%;
+      margin: 0 auto;
+      padding: 32px 28px 80px;
+    }
+
+    /* Hero */
+    .hero {
+      background: linear-gradient(135deg, var(--primary-50) 0%, var(--primary-100) 100%);
+      border-radius: var(--radius-lg);
+      padding: 36px 40px;
+      margin-bottom: 36px;
+      border: 1px solid var(--primary-100);
+    }
+
+    .hero h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .hero p {
+      color: var(--text-2);
+      font-size: 15px;
+      max-width: 640px;
+      margin: 0;
+    }
+
+    .hero .tagline {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, .7);
+      color: var(--primary-600);
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 500;
+      margin-bottom: 14px;
+    }
+
+    /* 区块 */
+    .section {
+      margin-bottom: 48px;
+      scroll-margin-top: 80px;
+    }
+
+    .section-head {
+      margin-bottom: 18px;
+    }
+
+    .section-head h2 {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+
+    .section-head p {
+      color: var(--text-3);
+      font-size: 13px;
+      margin: 0;
+    }
+
+    /* 演示卡片容器 */
+    .demo {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .demo-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px 16px;
+    }
+
+    .demo-row+.demo-row {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px dashed var(--border);
+    }
+
+    .demo-label {
+      width: 100%;
+      font-size: 12px;
+      color: var(--text-3);
+      margin-bottom: 4px;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    /* ---------- 4. 排版 ---------- */
+    .display-1 {
+      font-size: 40px;
+      font-weight: 700;
+      letter-spacing: -.02em;
+      line-height: 1.15;
+    }
+
+    .display-2 {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -.01em;
+    }
+
+    .h1 {
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .h2 {
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .h3 {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .body-lg {
+      font-size: 15px;
+    }
+
+    .body {
+      font-size: 14px;
+    }
+
+    .body-sm {
+      font-size: 12.5px;
+      color: var(--text-2);
+    }
+
+    .caption {
+      font-size: 12px;
+      color: var(--text-3);
+    }
+
+    .code {
+      font-family: "SF Mono", Menlo, Consolas, monospace;
+      font-size: 12.5px;
+      background: var(--gray-100);
+      padding: 2px 6px;
+      border-radius: var(--radius-xs);
+      color: var(--primary-700);
+    }
+
+    /* ---------- 5. 按钮 ---------- */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      height: 36px;
+      padding: 0 16px;
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
+      font-size: 13.5px;
+      font-weight: 500;
+      transition: background var(--t-base) var(--ease),
+        border-color var(--t-base) var(--ease),
+        color var(--t-base) var(--ease),
+        box-shadow var(--t-base) var(--ease),
+        transform var(--t-fast) var(--ease);
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(255, 171, 145, .45);
+    }
+
+    .btn:disabled,
+    .btn[disabled] {
+      opacity: .5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .btn svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    .btn-primary {
+      background: var(--primary-400);
+      color: #fff;
+      box-shadow: var(--shadow-xs);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-500);
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      color: var(--text-1);
+      border-color: var(--border-strong);
+    }
+
+    .btn-secondary:hover {
+      background: var(--gray-100);
+      border-color: var(--gray-400);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--primary-500);
+      border-color: var(--primary-300);
+    }
+
+    .btn-outline:hover {
+      background: var(--primary-50);
+      border-color: var(--primary-400);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-2);
+    }
+
+    .btn-ghost:hover {
+      background: var(--gray-100);
+      color: var(--text-1);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .btn-danger:hover {
+      background: #D14F4A;
+    }
+
+    .btn-sm {
+      height: 30px;
+      padding: 0 12px;
+      font-size: 12.5px;
+    }
+
+    .btn-lg {
+      height: 44px;
+      padding: 0 22px;
+      font-size: 15px;
+    }
+
+    .btn-block {
+      width: 100%;
+    }
+
+    .btn-icon {
+      width: 36px;
+      padding: 0;
+      height: 36px;
+    }
+
+    .btn-icon.btn-sm {
+      width: 30px;
+      height: 30px;
+    }
+
+    /* ---------- 6. 表单控件 ---------- */
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-1);
+      margin-bottom: 6px;
+    }
+
+    .field-hint {
+      font-size: 12px;
+      color: var(--text-3);
+      margin-top: 4px;
+    }
+
+    .field-error {
+      font-size: 12px;
+      color: var(--danger);
+      margin-top: 4px;
+    }
+
+    .input,
+    .textarea,
+    .select {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      padding: 0 12px;
+      height: 38px;
+      font-size: 14px;
+      color: var(--text-1);
+      transition: border-color var(--t-base) var(--ease),
+        box-shadow var(--t-base) var(--ease);
+    }
+
+    .textarea {
+      height: auto;
+      padding: 10px 12px;
+      min-height: 88px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .input::placeholder,
+    .textarea::placeholder {
+      color: var(--text-3);
+    }
+
+    .input:hover,
+    .textarea:hover,
+    .select:hover {
+      border-color: var(--gray-400);
+    }
+
+    .input:focus,
+    .textarea:focus,
+    .select:focus {
+      outline: none;
+      border-color: var(--primary-400);
+      box-shadow: 0 0 0 3px rgba(255, 171, 145, .30);
+    }
+
+    .input[disabled],
+    .textarea[disabled] {
+      background: var(--gray-100);
+      color: var(--text-3);
+      cursor: not-allowed;
+    }
+
+    .input.error {
+      border-color: var(--danger);
+    }
+
+    .input.error:focus {
+      box-shadow: 0 0 0 3px rgba(229, 97, 92, .20);
+    }
+
+    .input-affix {
+      position: relative;
+    }
+
+    .input-affix .input {
+      padding-left: 36px;
+    }
+
+    .input-affix .affix-icon {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: var(--text-3);
+      pointer-events: none;
+    }
+
+    .select {
+      appearance: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237A726B' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 34px;
+      cursor: pointer;
+    }
+
+    /* 复选 / 单选 */
+    .checkbox,
+    .radio {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+      font-size: 13.5px;
+      color: var(--text-1);
+    }
+
+    .checkbox input,
+    .radio input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .checkbox-box,
+    .radio-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      border: 1.5px solid var(--border-strong);
+      background: var(--bg-card);
+      display: grid;
+      place-items: center;
+      transition: all var(--t-base) var(--ease);
+      flex-shrink: 0;
+    }
+
+    .radio-dot {
+      border-radius: 50%;
+    }
+
+    .checkbox:hover input:not(:checked)+.checkbox-box,
+    .radio:hover input:not(:checked)+.radio-dot {
+      border-color: var(--primary-400);
+    }
+
+    .checkbox input:checked+.checkbox-box {
+      background: var(--primary-400);
+      border-color: var(--primary-400);
+    }
+
+    .radio input:checked+.radio-dot {
+      border-color: var(--primary-400);
+    }
+
+    .checkbox input:checked+.checkbox-box::after {
+      content: "";
+      width: 10px;
+      height: 6px;
+      border-left: 2px solid #fff;
+      border-bottom: 2px solid #fff;
+      transform: rotate(-45deg) translateY(-1px);
+    }
+
+    .radio input:checked+.radio-dot::after {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--primary-400);
+    }
+
+    .checkbox input:focus-visible+.checkbox-box,
+    .radio input:focus-visible+.radio-dot {
+      box-shadow: 0 0 0 3px rgba(255, 171, 145, .30);
+    }
+
+    .checkbox input:disabled~*,
+    .radio input:disabled~* {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    /* 开关 */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 22px;
+      cursor: pointer;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .switch-track {
+      position: absolute;
+      inset: 0;
+      background: var(--gray-300);
+      border-radius: var(--radius-full);
+      transition: background var(--t-base) var(--ease);
+    }
+
+    .switch-track::before {
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      left: 2px;
+      top: 2px;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: var(--shadow-xs);
+      transition: transform var(--t-base) var(--ease);
+    }
+
+    .switch input:checked+.switch-track {
+      background: var(--primary-400);
+    }
+
+    .switch input:checked+.switch-track::before {
+      transform: translateX(18px);
+    }
+
+    .switch input:focus-visible+.switch-track {
+      box-shadow: 0 0 0 3px rgba(255, 171, 145, .30);
+    }
+
+    .switch input:disabled+.switch-track {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    /* 滑块 */
+    .range {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--gray-200);
+      outline: none;
+    }
+
+    .range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      border: 2px solid var(--primary-400);
+      cursor: pointer;
+      box-shadow: var(--shadow-xs);
+      transition: transform var(--t-fast) var(--ease);
+    }
+
+    .range::-webkit-slider-thumb:hover {
+      transform: scale(1.1);
+    }
+
+    .range::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      border: 2px solid var(--primary-400);
+      cursor: pointer;
+    }
+
+    /* 表单栅格 */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 20px;
+    }
+
+    @media (max-width: 640px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ---------- 7. 数据展示 ---------- */
+
+    /* 徽章 / 标签 */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      height: 20px;
+      padding: 0 8px;
+      border-radius: var(--radius-full);
+      font-size: 11.5px;
+      font-weight: 500;
+      background: var(--gray-100);
+      color: var(--text-2);
+    }
+
+    .badge-primary {
+      background: var(--primary-50);
+      color: var(--primary-600);
+    }
+
+    .badge-success {
+      background: var(--success-bg);
+      color: var(--success);
+    }
+
+    .badge-warning {
+      background: var(--warning-bg);
+      color: #B57A1E;
+    }
+
+    .badge-danger {
+      background: var(--danger-bg);
+      color: var(--danger);
+    }
+
+    .badge-info {
+      background: var(--info-bg);
+      color: var(--info);
+    }
+
+    .badge-dot::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* 标签（可关闭） */
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 26px;
+      padding: 0 10px;
+      background: var(--gray-100);
+      color: var(--text-2);
+      border-radius: var(--radius-sm);
+      font-size: 12.5px;
+    }
+
+    .tag .tag-close {
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      color: var(--text-3);
+      transition: all var(--t-fast) var(--ease);
+    }
+
+    .tag .tag-close:hover {
+      background: var(--gray-300);
+      color: var(--text-1);
+    }
+
+    .tag.tag-primary {
+      background: var(--primary-50);
+      color: var(--primary-600);
+    }
+
+    /* 头像 */
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-300), var(--primary-500));
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .avatar-sm {
+      width: 28px;
+      height: 28px;
+      font-size: 11px;
+    }
+
+    .avatar-lg {
+      width: 48px;
+      height: 48px;
+      font-size: 17px;
+    }
+
+    .avatar-group {
+      display: flex;
+    }
+
+    .avatar-group .avatar {
+      margin-left: -8px;
+      border: 2px solid var(--bg-card);
+    }
+
+    .avatar-group .avatar:first-child {
+      margin-left: 0;
+    }
+
+    /* 卡片 */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      transition: box-shadow var(--t-base) var(--ease), transform var(--t-base) var(--ease);
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-md);
+    }
+
+    .card-body {
+      padding: 18px 20px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--text-2);
+      margin: 0;
+    }
+
+    .card-cover {
+      height: 120px;
+      background: linear-gradient(135deg, var(--primary-200), var(--primary-400));
+      position: relative;
+    }
+
+    .card-cover .card-cover-icon {
+      position: absolute;
+      right: 16px;
+      bottom: 12px;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .3);
+      display: grid;
+      place-items: center;
+      color: #fff;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .card-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 560px) {
+      .card-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* 统计卡片 */
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+    }
+
+    .stat-label {
+      font-size: 12.5px;
+      color: var(--text-3);
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -.01em;
+    }
+
+    .stat-trend {
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .stat-trend.up {
+      color: var(--success);
+    }
+
+    .stat-trend.down {
+      color: var(--danger);
+    }
+
+    /* 列表 */
+    .list {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    .list-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      transition: background var(--t-fast) var(--ease);
+    }
+
+    .list-item:last-child {
+      border-bottom: 0;
+    }
+
+    .list-item:hover {
+      background: var(--gray-50);
+    }
+
+    .list-item .list-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      background: var(--primary-50);
+      color: var(--primary-500);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .list-item .list-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .list-item .list-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .list-item .list-title {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .list-item .list-sub {
+      font-size: 12.5px;
+      color: var(--text-3);
+    }
+
+    /* 表格 */
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--bg-card);
+      font-size: 13.5px;
+    }
+
+    .table th,
+    .table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .table th {
+      background: var(--gray-50);
+      font-weight: 600;
+      color: var(--text-2);
+      font-size: 12.5px;
+    }
+
+    .table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .table tbody tr {
+      transition: background var(--t-fast) var(--ease);
+    }
+
+    .table tbody tr:hover {
+      background: var(--primary-50);
+    }
+
+    /* ---------- 8. 反馈 ---------- */
+
+    /* Alert */
+    .alert {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      font-size: 13.5px;
+      margin-bottom: 10px;
+    }
+
+    .alert-icon {
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+      margin-top: 1px;
+    }
+
+    .alert-title {
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .alert-body {
+      color: var(--text-2);
+    }
+
+    .alert-success {
+      background: var(--success-bg);
+      color: #2E6B4A;
+    }
+
+    .alert-warning {
+      background: var(--warning-bg);
+      color: #8A5A14;
+    }
+
+    .alert-danger {
+      background: var(--danger-bg);
+      color: #A23A36;
+    }
+
+    .alert-info {
+      background: var(--info-bg);
+      color: #2C6E9E;
+    }
+
+    /* Toast（演示用静态条） */
+    .toast {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--gray-800);
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .toast svg {
+      width: 16px;
+      height: 16px;
+      color: var(--primary-300);
+    }
+
+    /* 进度条 */
+    .progress {
+      width: 100%;
+      height: 8px;
+      background: var(--gray-100);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: var(--primary-400);
+      border-radius: var(--radius-full);
+      transition: width var(--t-slow) var(--ease);
+    }
+
+    .progress-bar.success {
+      background: var(--success);
+    }
+
+    .progress-bar.warning {
+      background: var(--warning);
+    }
+
+    .progress-bar.striped {
+      background-image: linear-gradient(45deg,
+          rgba(255, 255, 255, .25) 25%, transparent 25%,
+          transparent 50%, rgba(255, 255, 255, .25) 50%,
+          rgba(255, 255, 255, .25) 75%, transparent 75%);
+      background-size: 16px 16px;
+    }
+
+    /* 骨架屏 */
+    .skeleton {
+      background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-200) 50%, var(--gray-100) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s ease-in-out infinite;
+      border-radius: var(--radius-sm);
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: 200% 0;
+      }
+
+      100% {
+        background-position: -200% 0;
+      }
+    }
+
+    /* 空状态 */
+    .empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-3);
+    }
+
+    .empty-icon {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 12px;
+      border-radius: 50%;
+      background: var(--gray-100);
+      display: grid;
+      place-items: center;
+      color: var(--text-3);
+    }
+
+    .empty-icon svg {
+      width: 26px;
+      height: 26px;
+    }
+
+    .empty-title {
+      font-size: 14px;
+      color: var(--text-2);
+      margin-bottom: 4px;
+    }
+
+    .empty-desc {
+      font-size: 12.5px;
+    }
+
+    /* ---------- 9. 导航 ---------- */
+
+    /* 面包屑 */
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-3);
+    }
+
+    .breadcrumb a {
+      color: var(--text-2);
+    }
+
+    .breadcrumb a:hover {
+      color: var(--primary-500);
+    }
+
+    .breadcrumb-sep {
+      color: var(--text-3);
+    }
+
+    .breadcrumb-current {
+      color: var(--text-1);
+      font-weight: 500;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .tab {
+      padding: 10px 14px;
+      font-size: 13.5px;
+      color: var(--text-2);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+    }
+
+    .tab:hover {
+      color: var(--text-1);
+    }
+
+    .tab.active {
+      color: var(--primary-500);
+      border-bottom-color: var(--primary-400);
+      font-weight: 500;
+    }
+
+    /* 分页 */
+    .pagination {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .page-btn {
+      min-width: 32px;
+      height: 32px;
+      padding: 0 8px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--border-strong);
+      background: var(--bg-card);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      color: var(--text-2);
+      cursor: pointer;
+      transition: all var(--t-fast) var(--ease);
+    }
+
+    .page-btn:hover:not(:disabled) {
+      border-color: var(--primary-400);
+      color: var(--primary-500);
+    }
+
+    .page-btn.active {
+      background: var(--primary-400);
+      border-color: var(--primary-400);
+      color: #fff;
+    }
+
+    .page-btn:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+    }
+
+    /* 步骤条 */
+    .steps {
+      display: flex;
+    }
+
+    .step {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      position: relative;
+    }
+
+    .step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--gray-100);
+      color: var(--text-3);
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 1;
+    }
+
+    .step.done .step-num {
+      background: var(--primary-400);
+      color: #fff;
+    }
+
+    .step.active .step-num {
+      background: #fff;
+      border: 2px solid var(--primary-400);
+      color: var(--primary-500);
+    }
+
+    .step-label {
+      font-size: 12.5px;
+      color: var(--text-3);
+    }
+
+    .step.active .step-label {
+      color: var(--text-1);
+      font-weight: 500;
+    }
+
+    .step::before {
+      content: "";
+      position: absolute;
+      top: 14px;
+      left: -50%;
+      width: 100%;
+      height: 2px;
+      background: var(--gray-200);
+      z-index: 0;
+    }
+
+    .step:first-child::before {
+      display: none;
+    }
+
+    .step.done::before {
+      background: var(--primary-400);
+    }
+
+    /* ---------- 10. 浮层 / 弹层 ---------- */
+
+    /* Modal（演示用静态展示） */
+    .modal-mock {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      max-width: 440px;
+      margin: 0 auto;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+
+    .modal-mock-header {
+      padding: 18px 22px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-mock-header h3 {
+      font-size: 16px;
+    }
+
+    .modal-close {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: grid;
+      place-items: center;
+      color: var(--text-3);
+      cursor: pointer;
+      transition: all var(--t-fast) var(--ease);
+    }
+
+    .modal-close:hover {
+      background: var(--gray-100);
+      color: var(--text-1);
+    }
+
+    .modal-mock-body {
+      padding: 14px 22px;
+      font-size: 13.5px;
+      color: var(--text-2);
+    }
+
+    .modal-mock-footer {
+      padding: 14px 22px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      border-top: 1px solid var(--border);
+      background: var(--gray-50);
+    }
+
+    /* Tooltip（静态演示） */
+    .tooltip-mock {
+      position: relative;
+      display: inline-block;
+      background: var(--gray-800);
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+
+    .tooltip-mock::after {
+      content: "";
+      position: absolute;
+      bottom: -4px;
+      left: 50%;
+      transform: translateX(-50%) rotate(45deg);
+      width: 8px;
+      height: 8px;
+      background: var(--gray-800);
+    }
+
+    /* Popover / Dropdown 菜单 */
+    .menu {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      padding: 6px;
+      min-width: 180px;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 13.5px;
+      color: var(--text-1);
+      cursor: pointer;
+      transition: background var(--t-fast) var(--ease);
+    }
+
+    .menu-item:hover {
+      background: var(--primary-50);
+      color: var(--primary-600);
+    }
+
+    .menu-item svg {
+      width: 15px;
+      height: 15px;
+      color: var(--text-3);
+    }
+
+    .menu-item.danger {
+      color: var(--danger);
+    }
+
+    .menu-item.danger:hover {
+      background: var(--danger-bg);
+      color: var(--danger);
+    }
+
+    .menu-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 6px 0;
+    }
+
+    /* ---------- 11. 颜色板 ---------- */
+    .swatches {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 12px;
+    }
+
+    .swatch {
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+    }
+
+    .swatch-color {
+      height: 64px;
+    }
+
+    .swatch-meta {
+      padding: 8px 10px;
+      font-size: 11.5px;
+    }
+
+    .swatch-name {
+      font-weight: 600;
+      color: var(--text-1);
+    }
+
+    .swatch-hex {
+      color: var(--text-3);
+      font-family: "SF Mono", Menlo, monospace;
+    }
+
+    /* ---------- 12. 图标展示 ---------- */
+    .icon-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 10px;
+    }
+
+    .icon-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 14px 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      color: var(--text-3);
+    }
+
+    .icon-cell svg {
+      width: 22px;
+      height: 22px;
+      color: var(--text-1);
+    }
+
+    .icon-cell:hover {
+      border-color: var(--primary-300);
+      background: var(--primary-50);
+    }
+
+    .icon-cell:hover svg {
+      color: var(--primary-500);
+    }
+
+    /* ---------- 13. 工具 ---------- */
+    .flex {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .mt-0 {
+      margin-top: 0;
+    }
+
+    .mt-8 {
+      margin-top: 8px;
+    }
+
+    .mt-16 {
+      margin-top: 16px;
+    }
+
+    .mt-24 {
+      margin-top: 24px;
+    }
+
+    .mb-0 {
+      margin-bottom: 0;
+    }
+
+    .mb-8 {
+      margin-bottom: 8px;
+    }
+
+    .mb-16 {
+      margin-bottom: 16px;
+    }
+
+    .text-muted {
+      color: var(--text-3);
+    }
+
+    .text-primary {
+      color: var(--primary-500);
+    }
+
+    .divider-v {
+      width: 1px;
+      height: 20px;
+      background: var(--border-strong);
+    }
+
+    /* ---------- 14. 响应式 ---------- */
+    @media (max-width: 900px) {
+      .sidebar {
+        display: none;
+      }
+
+      .content {
+        padding: 20px 16px 60px;
+      }
+
+      .hero {
+        padding: 24px;
+      }
+
+      .hero h1 {
+        font-size: 22px;
+      }
+    }
+
+    /* （注：内容由AI生成） */
+  </style>
+  <style>
+    /* ===== B1 私有补充样式（不覆盖 ui-kits 规范） ===== */
+    [hidden] {
+      display: none !important;
+    }
+
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .toast-container .toast {
+      pointer-events: auto;
+    }
+
+    /* 版本选择覆盖层 */
+    .version-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: var(--bg-page);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .version-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      width: 520px;
+      max-width: 94vw;
+      padding: 36px 36px 28px;
+    }
+
+    .version-card-head {
+      margin-bottom: 22px;
+    }
+
+    .version-card-head h1 {
+      font-size: 22px;
+      margin: 8px 0 6px;
+    }
+
+    .version-card-head p {
+      color: var(--text-3);
+      font-size: 13px;
+      margin: 0;
+    }
+
+    .version-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .version-item {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+      text-align: left;
+      width: 100%;
+      padding: 14px 16px;
+    }
+
+    .version-item .version-label {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .version-item .version-desc {
+      font-size: 12.5px;
+      color: var(--text-3);
+      font-weight: 400;
+    }
+
+    .version-item[disabled] {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
+    .version-item {
+      min-height: 76px;
+    }
+
+    /* 主界面 */
+    #mainApp .content {
+      flex: 1;
+      min-height: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: stretch;
+    }
+
+    /* 棋盘格背景统一放在画布区，未加载与加载后都保留 */
+    #canvasArea {
+      background-color: var(--bg-card);
+      background-image:
+        linear-gradient(45deg, var(--gray-100) 25%, transparent 25%, transparent 75%, var(--gray-100) 75%),
+        linear-gradient(45deg, var(--gray-100) 25%, transparent 25%, transparent 75%, var(--gray-100) 75%);
+      background-size: 24px 24px;
+      background-position: 0 0, 12px 12px;
+    }
+
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-3);
+      gap: 8px;
+      background: transparent;
+    }
+
+    .empty-state h3 {
+      color: var(--text-2);
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .empty-state p {
+      font-size: 12.5px;
+      margin: 0;
+    }
+
+    .nav-placeholder {
+      margin: 12px;
+      padding: 12px;
+      font-size: 12px;
+      color: var(--text-3);
+      background: var(--bg-subtle);
+      border-radius: var(--radius-sm);
+      line-height: 1.6;
+    }
+
+    .session-badge-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #canvasArea {
+      position: relative;
+      overflow: hidden;
+    }
+
+    #spineMount {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    #spineMount canvas {
+      width: 100% !important;
+      height: 100% !important;
+      display: block;
+    }
+
+    .canvas-loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 10px 18px;
+      background: var(--gray-800);
+      color: #fff;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      z-index: 20;
+      box-shadow: var(--shadow-lg);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ============ 版本选择覆盖层（进入页面即显示） ============ -->
+  <div class="version-overlay" id="versionOverlay">
+    <div class="version-card">
+      <div class="version-card-head">
+        <span class="tagline">Spine Player</span>
+        <h1>选择本次会话使用的 Spine 版本</h1>
+        <p>版本一旦选定，本会话内锁定；如需切换请刷新页面。Spine 资源的导出小版本必须与所选版本一致。</p>
+      </div>
+      <div class="version-list" id="versionList"></div>
+      <div class="version-card-head">
+        <p><strong>仅用于学习研究，严谨用于商业用途</strong></p>
+      </div>
+      <div class="alert alert-danger" id="versionError" style="margin-top:16px; display:none;" role="alert"></div>
+      <div class="alert alert-info" id="versionLoading" style="margin-top:16px; display:none;" role="status">
+        正在加载播放器库，请稍候…
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 主界面（两栏布局） ============ -->
+  <div class="app" id="mainApp" hidden>
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5z" />
+            <path d="M2 17l10 5 10-5" />
+            <path d="M2 12l10 5 10-5" />
+          </svg>
+        </div>
+        <span>Spine Player</span>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-title collapsible" id="loadToggle" style="cursor:pointer; user-select:none;">
+          资源加载 <span id="loadArrow">▾</span>
+        </div>
+        <div id="loadBody">
+          <div class="field">
+            <label class="field-label">本地 · 骨架文件（.json / .skel）</label>
+            <input type="file" id="localSkel" accept=".json,.skel" class="input">
+          </div>
+          <div class="field">
+            <label class="field-label">本地 · 图集文件（.atlas）</label>
+            <input type="file" id="localAtlas" accept=".atlas" class="input">
+          </div>
+          <div class="field">
+            <label class="field-label">本地 · 图片文件（.png，可多选）</label>
+            <input type="file" id="localPng" accept=".png,.jpg,.jpeg,.webp" multiple class="input">
+          </div>
+          <button class="btn btn-primary" id="btnLoadLocal" style="width:100%;">加载本地资源</button>
+
+          <hr style="margin:18px 0;">
+
+          <div class="field">
+            <label class="field-label">URL · 骨架地址</label>
+            <input class="input" id="urlSkel" placeholder="https://.../xxx.json">
+          </div>
+          <div class="field">
+            <label class="field-label">URL · 图集地址</label>
+            <input class="input" id="urlAtlas" placeholder="https://.../xxx.atlas">
+          </div>
+          <div class="field">
+            <label class="field-label">URL · 图片地址（多个用逗号分隔，可留空由 atlas 推断）</label>
+            <input class="input" id="urlPng" placeholder="https://.../xxx.png">
+          </div>
+          <div class="field-hint" style="color:var(--warning); margin-bottom:10px;">
+            跨域提示：远程资源需目标服务器允许 CORS，否则浏览器会拦截加载。
+          </div>
+          <button class="btn btn-primary" id="btnLoadUrl" style="width:100%;">加载 URL 资源</button>
+        </div><!-- /loadBody -->
+      </div>
+
+      <div class="nav-group" id="viewGroup" hidden>
+        <div class="nav-group-title">画布视角</div>
+        <div class="field">
+          <div class="field-label" style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+            缩放：<span id="zoomLabel">100%</span>
+            <button class="btn btn-secondary btn-sm" id="btnZoomOut">－</button>
+            <button class="btn btn-secondary btn-sm" id="btnZoomIn">＋</button>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label" style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+            旋转：
+            <button class="btn btn-secondary btn-sm" id="btnRotateL">⟲</button>
+            <input class="input" id="rotateInput" type="number" value="0"
+              style="width:64px; text-align:center; padding:4px 8px;">
+            <button class="btn btn-secondary btn-sm" id="btnRotateR">⟳</button>
+          </div>
+        </div>
+        <button class="btn btn-outline" id="btnResetView" style="width:100%;">重置视角</button>
+      </div>
+
+      <div class="nav-group" id="playGroup" hidden>
+        <div class="nav-group-title">播放控制</div>
+
+        <!-- 全局播放控制 -->
+        <div style="display:flex; gap:6px; margin-bottom:12px;">
+          <button class="btn btn-primary btn-sm" id="btnGlobalPlay" style="flex:1;">播放</button>
+          <button class="btn btn-secondary btn-sm" id="btnGlobalPause" style="flex:1;">暂停</button>
+          <button class="btn btn-secondary btn-sm" id="btnGlobalStop" style="flex:1;">停止</button>
+        </div>
+
+        <!-- 全局设置 -->
+        <div class="field">
+          <div class="field-label" style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+            <span style="white-space:nowrap;">速度</span>
+            <input type="range" id="globalSpeed" min="0" max="3" step="0.1" value="1" style="flex:1; min-width:80px;">
+            <input type="number" id="globalSpeedNum" class="input" value="1" min="0" max="3" step="0.1"
+              style="width:60px; padding:2px 6px;">
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">全局循环模式</div>
+          <select id="globalLoop" class="select" style="width:100%;">
+            <option value="loop" selected>循环播放</option>
+            <option value="once">单次播放</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="field-label" style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+            <span style="white-space:nowrap;">混合时间</span>
+            <input type="range" id="globalMix" min="0" max="1" step="0.05" value="0.2" style="flex:1; min-width:80px;">
+            <input type="number" id="globalMixNum" class="input" value="0.2" min="0" max="1" step="0.05"
+              style="width:60px; padding:2px 6px;">
+          </div>
+        </div>
+
+        <hr style="margin:14px 0;">
+        <div id="trackList"></div>
+        <button class="btn btn-outline btn-sm" id="btnAddTrack" style="width:100%;">+ 添加轨道</button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <div class="crumb">Spine Player / <strong id="crumbVersion">未选择版本</strong></div>
+        <div class="topbar-spacer"></div>
+        <span class="badge badge-success" id="sessionBadge">会话就绪</span>
+      </header>
+      <main class="content" id="canvasArea">
+        <div class="empty-state" id="emptyState">
+          <h3>画布预览区</h3>
+          <p>加载 Spine 资源后，动画将在此渲染。</p>
+        </div>
+        <div id="spineMount" style="flex:1; position:relative; display:none; cursor:grab;">
+          <div id="spineViewport" style="width:100%; height:100%; transform-origin:center center;"></div>
+        </div>
+        <div id="canvasLoading" class="canvas-loading" style="display:none;">正在加载资源…</div>
+      </main>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    /* ============================================================
+     * B1：版本选择与动态库加载
+     * ============================================================ */
+
+    /**
+     * 可用 Spine 版本清单。
+     * 当前 spine-web-player 在 npm 上仅发布 4.2.x（最新 4.2.4）；
+     * 后续库发布 4.1.x 时，在此数组追加一项即可。
+     */
+    var SPINE_VERSIONS = [
+      {
+        version: '4.2',
+        label: 'Spine 4.2',
+        description: '基于 spine-web-player@4.2.4，兼容 4.2.x 导出的骨架与图集',
+        umdUrl: 'https://unpkg.com/spine-web-player@4.2.4/dist/spine-player.umd.js',
+        globalName: 'SpinePlayer'
+      }
+    ];
+
+    var state = {
+      selectedVersion: null,   // 选中的版本配置对象
+      loading: false
+    };
+
+    /* ---------- Toast（沿用 ui-kits.html 原版实现） ---------- */
+    function showToast(msg) {
+      var c = document.getElementById('toastContainer');
+      var t = document.createElement('div');
+      t.className = 'toast';
+      t.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><span></span>';
+      t.querySelector('span').textContent = msg;
+      t.style.opacity = '0';
+      t.style.transform = 'translateY(-8px)';
+      t.style.transition = 'opacity 180ms ease, transform 180ms ease';
+      c.appendChild(t);
+      requestAnimationFrame(function () {
+        t.style.opacity = '1';
+        t.style.transform = 'translateY(0)';
+      });
+      setTimeout(function () {
+        t.style.opacity = '0';
+        t.style.transform = 'translateY(-8px)';
+        setTimeout(function () {t.remove();}, 200);
+      }, 2200);
+    }
+
+    /* ---------- 动态加载外部脚本 ---------- */
+    function loadScript(src, timeoutMs) {
+      return new Promise(function (resolve, reject) {
+        var s = document.createElement('script');
+        s.src = src;
+        s.async = true;
+        s.onload = function () {resolve(s);};
+        s.onerror = function () {reject(new Error('无法加载播放器库：' + src));};
+        document.head.appendChild(s);
+        setTimeout(function () {reject(new Error('播放器库加载超时，请检查网络后重试'));}, timeoutMs || 20000);
+      });
+    }
+
+    /* ---------- 渲染版本列表 ---------- */
+    function renderVersionList() {
+      var list = document.getElementById('versionList');
+      list.innerHTML = '';
+      SPINE_VERSIONS.forEach(function (v) {
+        var btn = document.createElement('button');
+        btn.className = 'btn btn-outline version-item';
+        btn.type = 'button';
+        btn.innerHTML =
+          '<span class="version-label"></span>' +
+          '<span class="version-desc"></span>';
+        btn.querySelector('.version-label').textContent = v.label;
+        btn.querySelector('.version-desc').textContent = v.description;
+        btn.addEventListener('click', function () {onSelectVersion(v, btn);});
+        list.appendChild(btn);
+      });
+    }
+
+    /* ---------- 选择版本 -> 动态加载库 -> 进入主界面 ---------- */
+    function onSelectVersion(v, btn) {
+      if (state.loading) return;
+      state.loading = true;
+
+      var errBox = document.getElementById('versionError');
+      var loadBox = document.getElementById('versionLoading');
+      errBox.style.display = 'none';
+      loadBox.style.display = 'block';
+
+      // 禁用所有版本按钮
+      Array.prototype.forEach.call(
+        document.querySelectorAll('#versionList .version-item'),
+        function (b) {b.disabled = true;}
+      );
+
+      loadScript(v.umdUrl, 20000)
+        .then(function () {
+          // UMD 把导出挂在 window.SpinePlayer 命名空间下，真正的构造类是 window.SpinePlayer.SpinePlayer
+          var ns = window[v.globalName];
+          if (!ns || typeof ns.SpinePlayer !== 'function') {
+            throw new Error('播放器库已加载，但未找到构造类 ' + v.globalName + '.SpinePlayer，可能版本不兼容');
+          }
+          enterMainApp(v);
+        })
+        .catch(function (err) {
+          state.loading = false;
+          loadBox.style.display = 'none';
+          errBox.style.display = 'block';
+          errBox.textContent = err.message || '加载失败，请重试';
+          // 恢复按钮可重试
+          Array.prototype.forEach.call(
+            document.querySelectorAll('#versionList .version-item'),
+            function (b) {b.disabled = false;}
+          );
+        });
+    }
+
+    /* ---------- 进入主界面（单会话锁定） ---------- */
+    function enterMainApp(v) {
+      state.selectedVersion = v;
+      state.loading = false;
+
+      document.getElementById('versionOverlay').hidden = true;
+      document.getElementById('mainApp').hidden = false;
+      document.getElementById('crumbVersion').textContent = v.label + '（已锁定）';
+
+      showToast('播放器库加载成功，已进入 ' + v.label + ' 会话');
+    }
+
+    /* ============================================================
+     * B2：资源加载（本地 base64 data URL + URL）
+     * ============================================================ */
+    var player = null;  // 当前 SpinePlayer 实例
+
+    function readFileAsDataURL(file) {
+      return new Promise(function (resolve, reject) {
+        var r = new FileReader();
+        r.onload = function () {resolve({name: file.name, dataUrl: r.result});};
+        r.onerror = function () {reject(new Error('文件读取失败：' + file.name));};
+        r.readAsDataURL(file);
+      });
+    }
+
+    function decodeDataURLToText(dataUrl) {
+      var parts = String(dataUrl).split(',');
+      if (parts.length < 2) return '';
+      try {return atob(parts[1]);} catch (e) {return '';}
+    }
+
+    // atlas 文件开头在第一个 size:/filter: 之前的非空行即为引用的图片名
+    function extractAtlasImageNames(atlasText) {
+      var lines = String(atlasText).split(/\r?\n/);
+      var names = [];
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i].trim();
+        if (line === '') continue;
+        if (/^(size|format|filter|repeat|pma)/i.test(line)) break;
+        names.push(line);
+      }
+      return names;
+    }
+
+    function setCanvasLoading(on) {
+      document.getElementById('canvasLoading').style.display = on ? 'block' : 'none';
+    }
+
+    /* B3：画布变换状态 */
+    var viewState = {scale: 1, x: 0, y: 0, rotation: 0};
+    var canvasDebounceTimer = null;
+
+    function applyTransform() {
+      var vp = document.getElementById('spineViewport');
+      if (!vp) return;
+      vp.style.transform =
+        'translate(' + viewState.x + 'px,' + viewState.y + 'px) ' +
+        'scale(' + viewState.scale + ') ' +
+        'rotate(' + viewState.rotation + 'deg)';
+      var z = document.getElementById('zoomLabel');
+      if (z) z.textContent = Math.round(viewState.scale * 100) + '%';
+      var r = document.getElementById('rotateInput');
+      if (r && document.activeElement !== r) r.value = viewState.rotation;
+      // debounce：停止缩放 150ms 后才提升 canvas 分辨率
+      clearTimeout(canvasDebounceTimer);
+      canvasDebounceTimer = setTimeout(function () {
+        try {
+          var cvs = vp.querySelector('canvas');
+          if (cvs) {
+            var dpr = window.devicePixelRatio || 1;
+            var tw = Math.round(vp.clientWidth * dpr * viewState.scale);
+            var th = Math.round(vp.clientHeight * dpr * viewState.scale);
+            if (cvs.width !== tw || cvs.height !== th) {cvs.width = tw; cvs.height = th;}
+          }
+        } catch (e) { }
+      }, 150);
+    }
+
+    function resetView() {
+      viewState = {scale: 1, x: 0, y: 0, rotation: 0};
+      applyTransform();
+    }
+
+    function resetPlayer() {
+      if (player) {
+        try {player.dispose();} catch (e) { }
+        player = null;
+      }
+      var vp = document.getElementById('spineViewport');
+      if (vp) vp.innerHTML = '';
+      var mount = document.getElementById('spineMount');
+      mount.style.display = 'none';
+      document.getElementById('emptyState').style.display = 'flex';
+      document.getElementById('viewGroup').hidden = true;
+      document.getElementById('playGroup').hidden = true;
+      resetView();
+    }
+
+    function doLoad(assets) {
+      // 换资源：先重置整页播放器状态，再加载
+      resetPlayer();
+      setCanvasLoading(true);
+
+      if (typeof window.SpinePlayer === 'undefined' || typeof window.SpinePlayer.SpinePlayer !== 'function') {
+        setCanvasLoading(false);
+        showToast('播放器库未就绪，请刷新后重新选择版本');
+        return Promise.resolve();
+      }
+
+      var mount = document.getElementById('spineMount');
+      document.getElementById('emptyState').style.display = 'none';
+      mount.style.display = 'block';
+      var vp = document.getElementById('spineViewport');
+
+      try {
+        var SpinePlayerCtor = window.SpinePlayer.SpinePlayer;
+        var inst = new SpinePlayerCtor(vp, {type: 'auto'});
+        return inst.loadSpine({
+          assets: assets,
+          loop: true,
+          autoPlay: true
+        }).then(function () {
+          player = inst;
+          try {player.setDpr(window.devicePixelRatio || 1);} catch (e) { }
+          setCanvasLoading(false);
+          document.getElementById('viewGroup').hidden = false;
+          document.getElementById('playGroup').hidden = false;
+          initPlaybackUI();
+          // 触发库按容器尺寸重排 canvas 内部分辨率
+          setTimeout(function () {
+            window.dispatchEvent(new Event('resize'));
+            try {
+              var vp = document.getElementById('spineViewport');
+              if (vp && typeof player.resize === 'function') player.resize(vp.clientWidth, vp.clientHeight);
+            } catch (e) { }
+            // 暴力设置 canvas 为 2 倍超采样，放大到 200% 内清晰
+            try {
+              var vp2 = document.getElementById('spineViewport');
+              var cvs = vp2 ? vp2.querySelector('canvas') : null;
+              if (cvs) {
+                var dpr = window.devicePixelRatio || 1;
+                cvs.width = Math.round(vp2.clientWidth * dpr * 2);
+                cvs.height = Math.round(vp2.clientHeight * dpr * 2);
+                console.log('[spine] canvas supersample:', cvs.width, 'x', cvs.height);
+              }
+            } catch (e) { }
+          }, 50);
+          showToast('资源加载成功');
+          if (typeof window.collapseLoadPanel === 'function') window.collapseLoadPanel();
+        }).catch(function (err) {
+          setCanvasLoading(false);
+          resetPlayer();
+          showToast('加载失败：' + (err && err.message ? err.message : err));
+        });
+      } catch (err) {
+        setCanvasLoading(false);
+        resetPlayer();
+        showToast('初始化播放器失败：' + (err && err.message ? err.message : err));
+        return Promise.resolve();
+      }
+    }
+
+    function onLoadLocal() {
+      var skelFile = document.getElementById('localSkel').files[0];
+      var atlasFile = document.getElementById('localAtlas').files[0];
+      var pngInput = document.getElementById('localPng');
+      if (!skelFile) {showToast('请选择骨架文件（.json / .skel）'); return;}
+      if (!atlasFile) {showToast('请选择图集文件（.atlas）'); return;}
+      if (!pngInput.files || pngInput.files.length === 0) {showToast('请至少选择一张图片文件（.png）'); return;}
+
+      // 用 blob URL 代替 data URL；库通过字符串后缀 .skel 判断二进制格式，
+      // 所以在 blob URL 后拼 hash 片段（#.skel / #.json / #.atlas）骗过扩展名检测，
+      // hash 不影响 fetch 实际请求。
+      var skelIsBinary = /\.skel$/i.test(skelFile.name);
+      var skelBlobUrl = URL.createObjectURL(skelFile);
+      var atlasBlobUrl = URL.createObjectURL(atlasFile);
+      var skelUrl = skelBlobUrl + (skelIsBinary ? '#.skel' : '#.json');
+      var atlasUrl = atlasBlobUrl + '#.atlas';
+
+      // 读 atlas 文本以校验引用图片
+      var atlasReader = new FileReader();
+      atlasReader.onload = function () {
+        var referenced = extractAtlasImageNames(atlasReader.result);
+
+        var provided = {};
+        Array.prototype.forEach.call(pngInput.files, function (f) {
+          provided[f.name] = URL.createObjectURL(f);
+        });
+        var missing = referenced.filter(function (n) {return !provided[n];});
+        if (missing.length > 0) {
+          showToast('图集引用的图片未提供：' + missing.join('、'));
+          return;
+        }
+
+        doLoad({
+          skel: skelUrl,
+          atlas: atlasUrl,
+          fileAlias: provided,
+          textures: Object.keys(provided).map(function (k) {return provided[k];})
+        });
+      };
+      atlasReader.onerror = function () {
+        showToast('图集文件读取失败');
+      };
+      atlasReader.readAsText(atlasFile);
+    }
+
+    function onLoadUrl() {
+      var skel = document.getElementById('urlSkel').value.trim();
+      var atlas = document.getElementById('urlAtlas').value.trim();
+      var pngRaw = document.getElementById('urlPng').value.trim();
+      if (!skel) {showToast('请填写骨架 URL'); return;}
+      if (!atlas) {showToast('请填写图集 URL'); return;}
+
+      var assets = {skel: skel, atlas: atlas};
+      if (pngRaw) {
+        var textures = pngRaw.split(/[,，]/).map(function (s) {return s.trim();}).filter(Boolean);
+        if (textures.length > 0) assets.textures = textures;
+      }
+      doLoad(assets);
+    }
+
+    document.getElementById('btnLoadLocal').addEventListener('click', onLoadLocal);
+    document.getElementById('btnLoadUrl').addEventListener('click', onLoadUrl);
+
+    /* ===== B3：画布变换交互 ===== */
+    (function initViewControls() {
+      var mount = document.getElementById('spineMount');
+
+      // 滚轮：Alt=旋转；Ctrl=大步幅；Shift=小步幅；以鼠标位置为中心按比例缩放
+      mount.addEventListener('wheel', function (e) {
+        e.preventDefault();
+        var dir = e.deltaY < 0 ? 1 : -1;
+        var rect = mount.getBoundingClientRect();
+        var cx = rect.width / 2, cy = rect.height / 2;
+        var mx = e.clientX - rect.left, my = e.clientY - rect.top;
+        if (e.altKey) {
+          // 围绕鼠标点旋转
+          var delta = dir * (e.ctrlKey ? 15 : e.shiftKey ? 1 : 5);
+          var rad = delta * Math.PI / 180;
+          var cos = Math.cos(rad), sin = Math.sin(rad);
+          var vx = mx - cx - viewState.x;
+          var vy = my - cy - viewState.y;
+          viewState.x = +((mx - cx) - (vx * cos - vy * sin)).toFixed(2);
+          viewState.y = +((my - cy) - (vx * sin + vy * cos)).toFixed(2);
+          viewState.rotation += delta;
+        } else {
+          var factor = e.ctrlKey ? 1.3 : e.shiftKey ? 1.03 : 1.1;
+          var f = dir > 0 ? factor : 1 / factor;
+          var oldScale = viewState.scale;
+          var newScale = Math.max(0.1, Math.min(5, +(oldScale * f).toFixed(3)));
+          var ratio = newScale / oldScale;
+          viewState.x = +(((mx - cx) - (mx - cx - viewState.x) * ratio)).toFixed(2);
+          viewState.y = +(((my - cy) - (my - cy - viewState.y) * ratio)).toFixed(2);
+          viewState.scale = newScale;
+        }
+        applyTransform();
+      }, {passive: false});
+
+      // 拖拽平移（Ctrl 大步幅 / Shift 小步幅）
+      var dragging = false, lastX = 0, lastY = 0;
+      mount.addEventListener('mousedown', function (e) {
+        if (e.target.closest('button, input')) return;
+        dragging = true; lastX = e.clientX; lastY = e.clientY;
+        mount.style.cursor = 'grabbing';
+        e.preventDefault();
+      });
+      window.addEventListener('mousemove', function (e) {
+        if (!dragging) return;
+        var mult = e.ctrlKey ? 3 : e.shiftKey ? 0.3 : 1;
+        viewState.x += (e.clientX - lastX) * mult;
+        viewState.y += (e.clientY - lastY) * mult;
+        lastX = e.clientX; lastY = e.clientY;
+        applyTransform();
+      });
+      window.addEventListener('mouseup', function () {
+        dragging = false;
+        mount.style.cursor = 'grab';
+      });
+
+      // 按钮：缩放
+      document.getElementById('btnZoomIn').addEventListener('click', function (e) {
+        viewState.scale = Math.min(5, +(viewState.scale * 1.1).toFixed(3));
+        applyTransform(); e.currentTarget.blur();
+      });
+      document.getElementById('btnZoomOut').addEventListener('click', function (e) {
+        viewState.scale = Math.max(0.1, +(viewState.scale / 1.1).toFixed(3));
+        applyTransform(); e.currentTarget.blur();
+      });
+
+      // 按钮：旋转
+      document.getElementById('btnRotateL').addEventListener('click', function (e) {
+        viewState.rotation -= 15; applyTransform(); e.currentTarget.blur();
+      });
+      document.getElementById('btnRotateR').addEventListener('click', function (e) {
+        viewState.rotation += 15; applyTransform(); e.currentTarget.blur();
+      });
+      document.getElementById('rotateInput').addEventListener('change', function (e) {
+        var v = parseFloat(e.target.value);
+        if (!isNaN(v)) {viewState.rotation = v; applyTransform();}
+      });
+
+      // 重置视角
+      document.getElementById('btnResetView').addEventListener('click', resetView);
+    })();
+
+    /* 资源加载分组折叠 */
+    (function initLoadCollapse() {
+      var toggle = document.getElementById('loadToggle');
+      var body = document.getElementById('loadBody');
+      var arrow = document.getElementById('loadArrow');
+      toggle.addEventListener('click', function () {
+        var collapsed = body.style.display === 'none';
+        body.style.display = collapsed ? '' : 'none';
+        arrow.textContent = collapsed ? '▾' : '▸';
+      });
+      // 加载成功后自动折叠（doLoad 成功时调用）
+      window.collapseLoadPanel = function () {
+        body.style.display = 'none';
+        arrow.textContent = '▸';
+      };
+    })();
+
+    /* ===== B4：播放控制（多轨道动态列表） ===== */
+    var animNames = [];
+    var tracks = [];
+    var globalCfg = {speed: 1, loop: true, mix: 0.2};
+    var playbackBound = false;
+    var globalPaused = false;
+
+    // 底层 AnimationState 访问（库封装未暴露 per-track 控制，直接读内部状态）
+    function getAnimState() {
+      if (!player) return null;
+      return player.animationState || player.state || player._state || player._animationState ||
+        (player.skeleton && player.skeleton.animationState) || null;
+    }
+    function getTrackEntry(i) {
+      var s = getAnimState();
+      if (s && typeof s.getCurrent === 'function') {try {return s.getCurrent(i);} catch (e) { } }
+      return null;
+    }
+    function applyTrackEntryProps(i) {
+      var t = tracks[i];
+      if (!t) return;
+      var entry = getTrackEntry(i);
+      if (!entry) return;
+      var spd = t.custom ? t.speed : globalCfg.speed;
+      var mix = t.custom ? t.mix : globalCfg.mix;
+      try {
+        entry.timeScale = globalPaused ? 0 : spd;
+        if (typeof entry.mix === 'number') entry.mix = mix;
+      } catch (e) { }
+    }
+    function clearTrack(i) {
+      var s = getAnimState();
+      if (s && typeof s.setEmptyAnimation === 'function') {
+        try {s.setEmptyAnimation(i, tracks[i] ? (tracks[i].custom ? tracks[i].mix : globalCfg.mix) : 0.2); return;} catch (e) { }
+      }
+      if (player) {try {player.playAnimation('', false, i);} catch (e) { } }
+    }
+
+    // 统一播放入口：按该轨道有效设置（custom 用轨道值，否则用全局值）播放新周期
+    function playTrack(i) {
+      var t = tracks[i];
+      if (!player || !t || !t.anim) return;
+      var loop = t.custom ? t.loop === 'loop' : globalCfg.loop;
+      try {player.playAnimation(t.anim, loop, i);} catch (e) { }
+      (function (idx) {setTimeout(function () {applyTrackEntryProps(idx);}, 0);})(i);
+    }
+
+    function initPlaybackUI() {
+      animNames = [];
+      try {animNames = player.getAnimations() || [];} catch (e) { }
+
+      globalCfg = {speed: 1, loop: true, mix: 0.2};
+      document.getElementById('globalSpeed').value = 1;
+      document.getElementById('globalSpeedNum').value = 1;
+      document.getElementById('globalLoop').value = 'loop';
+      document.getElementById('globalMix').value = 0.2;
+      document.getElementById('globalMixNum').value = 0.2;
+
+      tracks = [];
+      addTrack(animNames[0] || '');
+
+      if (!playbackBound) {
+        playbackBound = true;
+        bindGlobalEvents();
+      }
+    }
+
+    function addTrack(anim) {
+      tracks.push({anim: anim || '', loop: 'loop', speed: 1, mix: 0.2, custom: false});
+      renderTrackList();
+    }
+
+    function removeTrack(index) {
+      if (tracks.length <= 1) return;
+      tracks.splice(index, 1);
+      // 清空所有 Spine track，再按新 UI index 重新映射播放
+      var s = getAnimState();
+      if (s) {
+        if (typeof s.clearTracks === 'function') {try {s.clearTracks();} catch (e) { } }
+        else {tracks.forEach(function (_, i) {try {if (s.setEmptyAnimation) s.setEmptyAnimation(i, 0);} catch (e) { } });}
+      }
+      renderTrackList();
+      tracks.forEach(function (t, i) {if (t.anim) playTrack(i);});
+    }
+
+    function renderTrackList() {
+      var box = document.getElementById('trackList');
+      box.innerHTML = '';
+      tracks.forEach(function (track, i) {
+        var el = document.createElement('div');
+        el.style.cssText = 'border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px; margin-bottom:10px; background:var(--bg-card);';
+
+        var head = document.createElement('div');
+        head.style.cssText = 'display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;';
+        head.innerHTML = '<span style="font-weight:600; font-size:13px;">轨道 ' + i + '</span>';
+        var delBtn = document.createElement('button');
+        delBtn.className = 'btn btn-ghost btn-sm'; delBtn.textContent = '×'; delBtn.title = '删除此轨道';
+        delBtn.addEventListener('click', function (e) {removeTrack(i); e.currentTarget.blur();});
+        head.appendChild(delBtn); el.appendChild(head);
+
+        var animSel = document.createElement('select');
+        animSel.className = 'select'; animSel.style.width = '100%'; animSel.style.marginBottom = '8px';
+        animSel.innerHTML = '<option value="">— 选择动画 —</option>';
+        animNames.forEach(function (n) {
+          var o = document.createElement('option');
+          o.value = n; o.textContent = n;
+          if (n === track.anim) o.selected = true;
+          animSel.appendChild(o);
+        });
+        animSel.addEventListener('change', function (e) {
+          track.anim = e.target.value;
+          if (player && track.anim) {
+            var loop = track.custom ? track.loop === 'loop' : globalCfg.loop;
+            try {player.playAnimation(track.anim, loop, i);} catch (err) { }
+          }
+        });
+        el.appendChild(animSel);
+
+        var btnRow = document.createElement('div');
+        btnRow.style.cssText = 'display:flex; gap:6px; margin-bottom:8px;';
+        var bPlay = document.createElement('button');
+        bPlay.className = 'btn btn-primary btn-sm'; bPlay.textContent = '▶'; bPlay.style.flex = '1'; bPlay.title = '在此轨道播放';
+        bPlay.addEventListener('click', function (e) {
+          playTrack(i);
+          e.currentTarget.blur();
+        });
+        var bPause = document.createElement('button');
+        bPause.className = 'btn btn-secondary btn-sm'; bPause.textContent = '⏸'; bPause.style.flex = '1'; bPause.title = '暂停此轨道';
+        bPause.addEventListener('click', function (e) {
+          var entry = getTrackEntry(i);
+          if (entry) {try {entry.timeScale = 0;} catch (err) { } }
+          e.currentTarget.blur();
+        });
+        var bStop = document.createElement('button');
+        bStop.className = 'btn btn-secondary btn-sm'; bStop.textContent = '■'; bStop.style.flex = '1'; bStop.title = '清空此轨道';
+        bStop.addEventListener('click', function (e) {
+          clearTrack(i);
+          e.currentTarget.blur();
+        });
+        btnRow.appendChild(bPlay); btnRow.appendChild(bPause); btnRow.appendChild(bStop);
+        el.appendChild(btnRow);
+
+        var customLabel = document.createElement('label');
+        customLabel.style.cssText = 'display:flex; align-items:center; gap:6px; font-size:12.5px; margin-bottom:6px; cursor:pointer;';
+        customLabel.innerHTML = '<input type="checkbox" class="track-custom-cb"> 单独设置播放';
+        var cb = customLabel.querySelector('.track-custom-cb');
+        cb.checked = track.custom;
+        var extra = document.createElement('div');
+        extra.style.cssText = 'display:none; padding:8px; background:var(--bg-subtle); border-radius:var(--radius-sm);';
+
+        extra.innerHTML =
+          '<div class="field" style="margin-bottom:8px;">' +
+          '<div class="field-label" style="display:flex; align-items:center; gap:6px; font-size:12px;"><span style="white-space:nowrap;">速度</span>' +
+          '<input type="range" class="spdSlider" min="0" max="3" step="0.1" value="1" style="flex:1; min-width:60px;">' +
+          '<input type="number" class="spdNum input" value="1" min="0" max="3" step="0.1" style="width:54px; padding:2px 6px;"></div></div>' +
+          '<div class="field" style="margin-bottom:8px;">' +
+          '<div class="field-label" style="font-size:12px;">循环模式</div>' +
+          '<select class="loopSel select" style="width:100%;"><option value="loop">循环</option><option value="once">单次</option></select></div>' +
+          '<div class="field">' +
+          '<div class="field-label" style="display:flex; align-items:center; gap:6px; font-size:12px;"><span style="white-space:nowrap;">混合</span>' +
+          '<input type="range" class="mixSlider" min="0" max="1" step="0.05" value="0.2" style="flex:1; min-width:60px;">' +
+          '<input type="number" class="mixNum input" value="0.2" min="0" max="1" step="0.05" style="width:54px; padding:2px 6px;"></div></div>';
+
+        var spdSlider = extra.querySelector('.spdSlider');
+        var spdNum = extra.querySelector('.spdNum');
+        var loopSel = extra.querySelector('.loopSel');
+        var mixSlider = extra.querySelector('.mixSlider');
+        var mixNum = extra.querySelector('.mixNum');
+
+        spdSlider.value = track.speed; spdNum.value = track.speed;
+        loopSel.value = track.loop;
+        mixSlider.value = track.mix; mixNum.value = track.mix;
+
+        spdSlider.addEventListener('input', function () {
+          track.speed = parseFloat(spdSlider.value); spdNum.value = track.speed;
+          if (track.custom) {var en = getTrackEntry(i); if (en && !globalPaused) {try {en.timeScale = track.speed;} catch (e) { } } }
+        });
+        spdNum.addEventListener('input', function () {
+          track.speed = parseFloat(spdNum.value) || 0; spdSlider.value = track.speed;
+          if (track.custom) {var en = getTrackEntry(i); if (en && !globalPaused) {try {en.timeScale = track.speed;} catch (e) { } } }
+        });
+        loopSel.addEventListener('change', function () {track.loop = loopSel.value; playTrack(i);});
+        mixSlider.addEventListener('input', function () {
+          track.mix = parseFloat(mixSlider.value); mixNum.value = track.mix;
+          if (track.custom) {var en = getTrackEntry(i); if (en) {try {en.mix = track.mix;} catch (e) { } } }
+        });
+        mixNum.addEventListener('input', function () {
+          track.mix = parseFloat(mixNum.value) || 0; mixSlider.value = track.mix;
+          if (track.custom) {var en = getTrackEntry(i); if (en) {try {en.mix = track.mix;} catch (e) { } } }
+        });
+
+        cb.addEventListener('change', function (e) {
+          track.custom = e.target.checked;
+          if (track.custom) {
+            track.speed = globalCfg.speed; track.mix = globalCfg.mix;
+            track.loop = globalCfg.loop ? 'loop' : 'once';
+            spdSlider.value = track.speed; spdNum.value = track.speed;
+            loopSel.value = track.loop;
+            mixSlider.value = track.mix; mixNum.value = track.mix;
+          }
+          extra.style.display = track.custom ? 'block' : 'none';
+          // 切换 custom 状态后按新设置重播新周期
+          playTrack(i);
+        });
+        if (track.custom) extra.style.display = 'block';
+
+        el.appendChild(customLabel); el.appendChild(extra);
+        box.appendChild(el);
+      });
+    }
+
+    function bindGlobalEvents() {
+      var gSpd = document.getElementById('globalSpeed');
+      var gSpdNum = document.getElementById('globalSpeedNum');
+      var gMix = document.getElementById('globalMix');
+      var gMixNum = document.getElementById('globalMixNum');
+
+      function applySpeed(v) {
+        globalCfg.speed = v; gSpd.value = v; gSpdNum.value = v;
+        tracks.forEach(function (t, i) {
+          if (t.custom) return;
+          var en = getTrackEntry(i);
+          if (en && !globalPaused) {try {en.timeScale = v;} catch (e) { } }
+        });
+      }
+      function applyMix(v) {
+        globalCfg.mix = v; gMix.value = v; gMixNum.value = v;
+        tracks.forEach(function (t, i) {
+          if (t.custom) return;
+          var en = getTrackEntry(i);
+          if (en) {try {en.mix = v;} catch (e) { } }
+        });
+      }
+      gSpd.addEventListener('input', function () {applySpeed(parseFloat(gSpd.value));});
+      gSpdNum.addEventListener('input', function () {applySpeed(parseFloat(gSpdNum.value) || 0);});
+      gMix.addEventListener('input', function () {applyMix(parseFloat(gMix.value));});
+      gMixNum.addEventListener('input', function () {applyMix(parseFloat(gMixNum.value) || 0);});
+
+      document.getElementById('globalLoop').addEventListener('change', function (e) {
+        globalCfg.loop = e.target.value === 'loop';
+        // 立即重播所有轨道新周期（custom 轨道用自己的 loop）
+        tracks.forEach(function (t, i) {playTrack(i);});
+      });
+
+      document.getElementById('btnGlobalPlay').addEventListener('click', function (e) {
+        if (!player) return;
+        globalPaused = false;
+        tracks.forEach(function (t, i) {playTrack(i);});
+        e.currentTarget.blur();
+      });
+      document.getElementById('btnGlobalPause').addEventListener('click', function (e) {
+        globalPaused = true;
+        tracks.forEach(function (t, i) {
+          var entry = getTrackEntry(i);
+          if (entry) {try {entry.timeScale = 0;} catch (err) { } }
+        });
+        e.currentTarget.blur();
+      });
+      document.getElementById('btnGlobalStop').addEventListener('click', function (e) {
+        tracks.forEach(function (t, i) {clearTrack(i);});
+        e.currentTarget.blur();
+      });
+
+      document.getElementById('btnAddTrack').addEventListener('click', function (e) {
+        addTrack(animNames[0] || '');
+        e.currentTarget.blur();
+      });
+    }
+
+    /* ---------- 启动 ---------- */
+    renderVersionList();
+  </script>
+</body>
+
+</html>
